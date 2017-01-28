@@ -1,0 +1,30 @@
+{
+  "name": "city-portal",
+  "version": "1.0.0",
+  "description": "City Portal",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "monitor": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ok-city/city-portal.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ok-city/city-portal/issues"
+  },
+  "homepage": "https://github.com/ok-city/city-portal#readme",
+  "dependencies": {
+    "body-parser": "^1.16.0",
+    "dotenv": "^4.0.0",
+    "express": "^4.14.0",
+    "mongodb": "^2.2.22",
+    "morgan": "^1.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "latest"
+  }
+}
