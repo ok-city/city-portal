@@ -18,9 +18,11 @@
   },
   "homepage": "https://github.com/ok-city/city-portal#readme",
   "dependencies": {
+    "@google-cloud/language": "^0.7.1",
     "body-parser": "^1.16.0",
     "dotenv": "^4.0.0",
     "express": "^4.14.0",
+    "google-cloud": "^0.45.2",
     "mongodb": "^2.2.22",
     "morgan": "^1.7.0"
   },
