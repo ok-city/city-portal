@@ -41,22 +41,23 @@ module.exports = (app, db) => {
 
   app.get('/getSentiment/*', (req, res) => {
     let text = req.query.text;
-    if (text != null) {
-      let sentiment = getSentiment(text);
+    getSentiment(text).then((sentiment) => {
       res.status(200).send(sentiment);
-    } else {
-      res.status(400).send();
-    }
+    });
   });
 
   function getSentiment(text) {
-    languageClient.detectSentiment(text, (err, nuthin, dataz) => {
-      if (!err) {
-        return {
-          score: dataz.documentSentiment.score,
-          magnitude: dataz.documentSentiment.magnitude
-        };
-      }
+    return new Promise((resolve, reject) => {
+      languageClient.detectSentiment(text, (err, nuthin, dataz) => {
+        if (!err) {
+          resolve({
+            score: dataz.documentSentiment.score,
+            magnitude: dataz.documentSentiment.magnitude
+          });
+        } else {
+          reject(undefined);
+        }
+      });
     });
   }
 };
