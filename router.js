@@ -8,13 +8,13 @@ const languageClient = language({
 
 module.exports = (app, db) => {
   app.get('/', (req, res) => {
-    res.status(200).send({message: 'Yo!'});
+    res.status(200).render('index');
   });
 
   app.get('/getReports/*', (req, res) => {
     const latCenter = parseFloat(req.query.lat);
     const lonCenter = parseFloat(req.query.lon);
-    const radius = req.query.radius;
+    const radius = req.query.radius; // in miles
 
     const reportsCollection = db.collection('reports');
 

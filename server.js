@@ -2,8 +2,6 @@ require('dotenv').config();
 const port = process.env.PORT;
 const mongoURL = process.env.MONGODB_URL;
 
-let morgan = require('morgan'); //Logs HTTP requests
-
 let express = require('express');
 let app = express();
 
@@ -14,7 +12,6 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }));
-
 app.use(lusca({
   csrf: true,
   // csp: {policy: {
@@ -27,16 +24,21 @@ app.use(lusca({
   nosniff: true
 }));
 
-
 let bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-let mongodbClient = require('mongodb').MongoClient;
+app.set('views', 'views/');
+app.set('view engine', 'ejs');
+app.use('/public', express.static('public'));
 
-app.use(morgan('dev')); // log every request to the console
+let morgan = require('morgan');
+app.use(morgan('dev'));
+
+let router = require('./router.js');
+let mongodbClient = require('mongodb').MongoClient;
 mongodbClient.connect(mongoURL).then((db) => {
-  require('./router.js')(app, db);
+  router(app, db);
   app.listen(port);
   console.info('Listening on port ' + port);
 }).catch((err) => {
