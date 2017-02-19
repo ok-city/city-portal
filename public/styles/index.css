@@ -15,7 +15,7 @@ html, body, #map-canvas {
 }
 
 .mdl-layout__drawer {
-    width: 408px;
+    width: 500px;
 }
 
 .mdh-expandable-search {
@@ -37,7 +37,7 @@ html, body, #map-canvas {
     /*-webkit-flex-grow: 1;*/
     /*-ms-flex-positive: 1;*/
     /*flex-grow: 1;*/
-    width: 368px;
+    width: 460px;
 }
 
 .mdh-expandable-search,
@@ -75,3 +75,24 @@ html, body, #map-canvas {
     color: #FFFFFF;
     opacity: 1;
 }
+
+.sidepanel-body {
+
+}
+
+.sidepanel-body table {
+    margin-left: 20px;
+    width: 460px;
+    table-layout: fixed;
+}
+
+.sidepanel-body td {
+    overflow-x: hidden;
+}
+
+.sentimentArrow {
+    width: 40px;
+    height: 40px;
+}
+
+.
