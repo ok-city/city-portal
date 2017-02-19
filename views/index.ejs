@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="/public/styles/index.css"/>
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <script src="/public/scripts/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 </head>
 <body>
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
@@ -22,11 +23,11 @@
         </div>
         <hr>
         <div class="sidepanel-body">
-            <table class="mdl-data-table mdl-shadow--2dp">
+            <table class="mdl-data-table mdl-shadow--2dp" id="tableOfReports">
                 <thead>
                 <tr>
-                    <th>Report</th>
-                    <th>Sentiment</th>
+                    <th style="widows: 80%;">Report</th>
+                    <th style="width:20%;">Sentiment</th>
                 </tr>
                 </thead>
                 <tbody>
