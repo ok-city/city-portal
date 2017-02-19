@@ -70,12 +70,12 @@ function generateHtmlForTableRow(report, sentiment) {
   let td = '';
   let sentimentJSON = JSON.parse(sentiment);
   console.log('sentiment = ' + sentiment);
-  if (sentimentJSON.score >= 0.0) {
+  if (sentimentJSON.score >= 0.2) {
     td = '<td><img src="/public/images/caret-up.svg" class="sentimentArrow"></td>';
-  } else if (sentimentJSON.score <= -0.0) {
+  } else if (sentimentJSON.score <= -0.2) {
     td = '<td><img src="/public/images/caret-down.svg" class="sentimentArrow"></td>';
   } else {
-    td = '<td></td>'
+    td = '<td><img src="public/images/horizontal-line.png" class="sentimentArrow"></td>'
   }
   let tr = '<tr><td>' + report.transcript + '</td>' + td + '</tr>';
   console.log('generated tr ' + tr);
