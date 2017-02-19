@@ -67,17 +67,22 @@ function getReportsInArea(latitude, longitude) {
 
 function placeSentimentOnMap(sentiment, report) {
 
+  let theActualReport = JSON.parse(report)[0];
   let opacity = Math.min(Math.min(sentiment.magnitude, 0), 1);
   // let redComponent =
+
+  console.log('theActualReport = ' + theActualReport);
+  console.log('coordinates = ' + theActualReport.location.coordinates);
 
   let sentimentCircle = new google.maps.Circle({
     strokeColor: '#FF0000',
     strokeOpacity: 0.8,
     strokeWeight: 2,
-    fillColor: '#FF0000',
+    fillColor: '#ff7663',
     fillOpacity: 0.35,
     map: map,
-    center: {lat: report.location.coordinates[1], lng: report.location.coordinates[0]},
+    center: {lat: theActualReport.location.coordinates[1],
+      lng: theActualReport.location.coordinates[0]},
     radius: 10
   });
 }
@@ -107,7 +112,7 @@ function placeReportOnMap(report) {
   });
 
   marker.addListener('click', function () {
-    infowindow.open(map, marker);
+    openNav();
   });
 
 }
@@ -121,8 +126,8 @@ function httpGetAsync(theUrl) {
     request.send(null);
     request.onreadystatechange = function () {
       if (request.readyState === XMLHttpRequest.DONE) {
-        if (request.status === 200) {
-          console.log('resolving with data: ' + request.responseText);
+        if (request.status === 200 || request.status === 304) {
+          // console.log('resolving with data: ' + request.responseText);
           resolve(request.responseText);
         } else {
           console.log('rejecting!');

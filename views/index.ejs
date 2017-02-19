@@ -4,38 +4,26 @@
     <title>Simple Map</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="/public/styles/index.css"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" type="text/css" href="/public/styles/index.css"/>
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <script src="/public/scripts/index.js"></script>
 </head>
 <body>
-<!--<div class="container">-->
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header">
-        <div class="mdl-layout__header-row">
-            <!-- Title -->
-            <span class="mdl-layout-title">Title</span>
-            <!-- Add spacer, to align navigation to the right -->
-            <div class="mdl-layout-spacer"></div>
-            <!-- Navigation. We hide it in small screens. -->
-            <nav class="mdl-navigation mdl-layout--large-screen-only">
-                <a class="mdl-navigation__link" href="">Link</a>
-                <a class="mdl-navigation__link" href="">Link</a>
-                <a class="mdl-navigation__link" href="">Link</a>
-                <a class="mdl-navigation__link" href="">Link</a>
-            </nav>
-        </div>
-    </header>
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
     <div class="mdl-layout__drawer">
-        <span class="mdl-layout-title">Title</span>
-        <nav class="mdl-navigation">
-            <a class="mdl-navigation__link" href="">Link</a>
-            <a class="mdl-navigation__link" href="">Link</a>
-            <a class="mdl-navigation__link" href="">Link</a>
-            <a class="mdl-navigation__link" href="">Link</a>
-        </nav>
+        <!--<span class="mdl-layout-title">City Portal</span>-->
+        <div class="mdh-expandable-search">
+            <i class="material-icons">search</i>
+            <form action="#">
+                <input type="text" placeholder="Filter Reports" size="1">
+            </form>
+        </div>
+        <hr>
+        <div class="mdh-layout-content">
+            <p>lorem ipsum foo bar bleep bloop bep bop</p>
+        </div>
     </div>
     <main class="mdl-layout__content" style="height:100%; width: 100%;">
         <div class="page-content" style="height:100%; width: 100%;">
@@ -45,7 +33,6 @@
         </div>
     </main>
 </div>
-
 </div>
 </body>
 </html>
