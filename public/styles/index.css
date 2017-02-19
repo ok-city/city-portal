@@ -32,21 +32,11 @@ html, body, #map-canvas {
 .mdh-expandable-search,
 .mdh-expandable-search form,
 .mdh-expandable-search input {
-    /* Cross browser flex-grow */
-    /*-webkit-box-flex: 1;*/
-    /*-webkit-flex-grow: 1;*/
-    /*-ms-flex-positive: 1;*/
-    /*flex-grow: 1;*/
     width: 460px;
 }
 
 .mdh-expandable-search,
 .mdh-expandable-search form {
-    /*Cross browser inline-flex*/
-    /*display: -webkit-inline-box;*/
-    /*display: -webkit-inline-flex;*/
-    /*display: -moz-inline-box;*/
-    /*display: -ms-inline-flexbox;*/
     display: inline-flex;
 }
 
@@ -77,11 +67,10 @@ html, body, #map-canvas {
 }
 
 .sidepanel-body {
-
+    margin-left: 20px;
 }
 
 .sidepanel-body table {
-    margin-left: 20px;
     width: 460px;
     table-layout: fixed;
 }
@@ -94,5 +83,3 @@ html, body, #map-canvas {
     width: 40px;
     height: 40px;
 }
-
-.

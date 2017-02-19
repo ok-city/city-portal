@@ -1,4 +1,6 @@
 let map;
+let reportAndSentiment = [];
+let markersOnMap = [];
 function initMap() { // Called by async request to Google
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: -34.397, lng: 150.644},
@@ -58,18 +60,17 @@ function getReportsInArea(latitude, longitude) {
     return Promise.all(reportSentiments);
   }).then((sentiments) => {
     sentiments.forEach((sentiment, i) => {
-      $('#tableOfReports').append(generateHtmlForTableRow(reports[i], sentiment));
-      // TODO Add to list of sentiments to retrieve later
+      reportAndSentiment.push({report: reports[i], sentiment: JSON.parse(sentiment)});
+      addReportToTable(reports[i], sentiment);
     });
   }).catch((statusCode) => {
     console.error('error code: ' + statusCode);
   });
 }
 
-function generateHtmlForTableRow(report, sentiment) {
+function addReportToTable(report, sentiment) {
   let td = '';
   let sentimentJSON = JSON.parse(sentiment);
-  console.log('sentiment = ' + sentiment);
   if (sentimentJSON.score >= 0.2) {
     td = '<td><img src="/public/images/caret-up.svg" class="sentimentArrow"></td>';
   } else if (sentimentJSON.score <= -0.2) {
@@ -77,9 +78,20 @@ function generateHtmlForTableRow(report, sentiment) {
   } else {
     td = '<td><img src="public/images/horizontal-line.png" class="sentimentArrow"></td>'
   }
-  let tr = '<tr><td>' + report.transcript + '</td>' + td + '</tr>';
-  console.log('generated tr ' + tr);
-  return tr;
+  let id = 'report_' + report._id;
+  let tr = '<tr id="' + id + '"><td>' + report.transcript + '</td>' + td + '</tr>';
+  $('#tableOfReports').append(tr);
+  $('#' + id).click(() => {
+    console.log('Clicked!');
+    panMapToMarker(report._id);
+  });
+}
+
+function panMapToMarker(reportID) {
+  console.log('panning map to marker');
+  let markerToPanTo = markersOnMap.filter(marker => marker.id === reportID).map(marker => marker.marker)[0];
+  map.panTo(markerToPanTo.position);
+  markerToPanTo.infoWindow.open(map, markerToPanTo);
 }
 
 /*
@@ -127,17 +139,18 @@ function placeReportOnMap(report) {
   let marker = new google.maps.Marker({
     position: reportLocation,
     map: map,
-    title: report.transcript
+    title: report.transcript,
+    infoWindow: infowindow
   });
+
+  markersOnMap.push({marker: marker, id: report._id});
 
   marker.addListener('click', function () {
     infowindow.open(map, marker);
   });
-
 }
 
 function httpGetAsync(theUrl) {
-  console.log('getting async! ');
   return new Promise((resolve, reject) => {
     let request = new XMLHttpRequest();
     request.open("GET", theUrl, true); // true for asynchronous
