@@ -125,14 +125,14 @@ function getReportsInArea(latitude, longitude) {
 function addReportToTable(report, sentiment) {
   let td = '';
   if (sentiment.score >= 0.2) {
-    td = '<td><img src="/public/images/thumbsup.png" class="sentimentArrow"></td>';
+    td = '<td id="sentimentIconData"><img src="/public/images/thumbup.svg" class="sentimentIcon"></td>';
   } else if (sentiment.score <= -0.2) {
-    td = '<td><img src="/public/images/thumbsdown.png" class="sentimentArrow"></td>';
+    td = '<td id="sentimentIconData"><img src="/public/images/thumbdown.svg" class="sentimentIcon"></td>';
   } else {
-    td = '<td><img src="public/images/horizontal-line.png" class="sentimentArrow"></td>'
+    td = '<td id="sentimentIconData"><img src="/public/images/horizontal-line.png" class="sentimentIcon"></td>'
   }
   let id = 'report_' + report._id;
-  let tr = '<tr id="' + id + '"><td>' + report.transcript + '</td>' + td + '</tr>';
+  let tr = '<tr id="' + id + '"><td class="transcriptText">' + report.transcript + '</td>' + td + '</tr>';
   $('#tableOfReports').append(tr);
   $('#' + id).click(() => {
     panMapToMarker(report._id);
