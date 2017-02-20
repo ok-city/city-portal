@@ -1,13 +1,41 @@
 let map;
 let reportAndSentiment = [];
-let markersOnMap = [];
+let totalMarkers = [];
 function initMap() { // Called by async request to Google
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: -34.397, lng: 150.644},
     zoom: 8
   });
 
+  $('#searchInput').keypress((e) => {
+    if (e.keyCode === 13) {
+      let query = $('#searchInput').val();
+      console.log('searching for ' + query);
+      filterMarkers(query);
+      $('#queryText').text('Query: ' + query);
+    }
+  });
+
   getUserLocation();
+}
+
+function filterMarkers(term) {
+  let idsOfMarkersThatShouldBeOnMap = reportAndSentiment
+    .filter(reportObj => reportObj.report.transcript.toLowerCase().includes(term.toLowerCase()))
+    .map(reportObj => reportObj.report._id);
+  removeAllReportsFromTable();
+  idsOfMarkersThatShouldBeOnMap
+    .forEach(id => reportAndSentiment.filter(reportObj => reportObj.report._id === id)
+      .forEach(reportObj => addReportToTable(reportObj.report, reportObj.sentiment)));
+  totalMarkers
+    .filter(markerObj => !idsOfMarkersThatShouldBeOnMap.includes(markerObj.id))
+    .map(markerObj => markerObj.marker)
+    .forEach(marker => marker.setMap(null));
+  totalMarkers
+    .filter(markerObj => idsOfMarkersThatShouldBeOnMap.includes(markerObj.id))
+    .map(markerObj => markerObj.marker)
+    .forEach(marker => marker.setMap(map));
+  panMapToMarker(idsOfMarkersThatShouldBeOnMap[0]);
 }
 
 function getUserLocation() {
@@ -62,7 +90,7 @@ function getReportsInArea(latitude, longitude) {
   }).then((sentiments) => {
     sentiments.forEach((sentiment, i) => {
       reportAndSentiment.push({report: reports[i], sentiment: JSON.parse(sentiment)});
-      addReportToTable(reports[i], sentiment);
+      addReportToTable(reports[i], JSON.parse(sentiment));
     });
   }).catch((statusCode) => {
     console.error('error code: ' + statusCode);
@@ -95,10 +123,9 @@ function getReportsInArea(latitude, longitude) {
 
 function addReportToTable(report, sentiment) {
   let td = '';
-  let sentimentJSON = JSON.parse(sentiment);
-  if (sentimentJSON.score >= 0.2) {
+  if (sentiment.score >= 0.2) {
     td = '<td><img src="/public/images/caret-up.svg" class="sentimentArrow"></td>';
-  } else if (sentimentJSON.score <= -0.2) {
+  } else if (sentiment.score <= -0.2) {
     td = '<td><img src="/public/images/caret-down.svg" class="sentimentArrow"></td>';
   } else {
     td = '<td><img src="public/images/horizontal-line.png" class="sentimentArrow"></td>'
@@ -111,9 +138,16 @@ function addReportToTable(report, sentiment) {
   });
 }
 
+function removeAllReportsFromTable() {
+  $('#tableOfReports').find('tr').has('td').remove();
+}
+
+function closeMarkerInfoWindows() {
+  totalMarkers.forEach(marker => marker.marker.infoWindow.close());
+}
 function panMapToMarker(reportID) {
-  let markerToPanTo = markersOnMap.filter(marker => marker.id === reportID).map(marker => marker.marker)[0];
-  markersOnMap.forEach(marker => marker.marker.infoWindow.close());
+  let markerToPanTo = totalMarkers.filter(marker => marker.id === reportID).map(marker => marker.marker)[0];
+  closeMarkerInfoWindows();
   map.panTo(markerToPanTo.position);
   markerToPanTo.infoWindow.open(map, markerToPanTo);
 }
@@ -167,7 +201,7 @@ function placeReportOnMap(report) {
     infoWindow: infowindow
   });
 
-  markersOnMap.push({marker: marker, id: report._id});
+  totalMarkers.push({marker: marker, id: report._id});
 
   marker.addListener('click', function () {
     infowindow.open(map, marker);
