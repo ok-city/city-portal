@@ -49,6 +49,7 @@ function getReportsInArea(latitude, longitude) {
   let getReportsURL = '/getReports/?lat=' + latitude + '&lon=' + longitude + '&radius=' + 500000;
   httpGetAsync(getReportsURL).then((data) => {
     let reportSentiments = [];
+    console.log('report = ' + data);
     let jsonData = JSON.parse(data);
     jsonData.forEach((report) => {
       reports.push(report);
@@ -68,6 +69,30 @@ function getReportsInArea(latitude, longitude) {
   });
 }
 
+/*
+ {
+ "_id":"588cf31775ed5d680745be4c",
+ "location":{
+ "coordinates":[0,0],
+ "type":"Point"
+ },
+ "transcript":"Offshore drilling rig explosion, plz send halp",
+ "timestamp":null
+ },
+ {
+ "_id":"588ec1b44bbd3968a3b8cd69",
+ "location":{
+ "coordinates":[-122.06494,37.377958],
+ "type":"Point"
+ },
+ "transcript":"\"Pool filter is clogged.\"",
+ "timestamp":1485750687218000
+ }
+
+
+ db.reports.insert({"location":{"coordinates":[37.382592,-122.067452],"type":"Point"},"transcript":"Offshore drilling rig explosion, plz send halp","timestamp":null}
+ */
+
 function addReportToTable(report, sentiment) {
   let td = '';
   let sentimentJSON = JSON.parse(sentiment);
@@ -82,14 +107,13 @@ function addReportToTable(report, sentiment) {
   let tr = '<tr id="' + id + '"><td>' + report.transcript + '</td>' + td + '</tr>';
   $('#tableOfReports').append(tr);
   $('#' + id).click(() => {
-    console.log('Clicked!');
     panMapToMarker(report._id);
   });
 }
 
 function panMapToMarker(reportID) {
-  console.log('panning map to marker');
   let markerToPanTo = markersOnMap.filter(marker => marker.id === reportID).map(marker => marker.marker)[0];
+  markersOnMap.forEach(marker => marker.marker.infoWindow.close());
   map.panTo(markerToPanTo.position);
   markerToPanTo.infoWindow.open(map, markerToPanTo);
 }
