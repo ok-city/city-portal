@@ -81,7 +81,6 @@ function getReportsInArea(latitude, longitude) {
     let jsonData = JSON.parse(data);
     jsonData.forEach((report) => {
       reports.push(report);
-      placeReportOnMap(report); // whoosh
       let url = '/getSentiment/?text=' + report.transcript;
       let sentimentHere = httpGetAsync(url);
       reportSentiments.push(sentimentHere); // collect the promises
@@ -89,8 +88,10 @@ function getReportsInArea(latitude, longitude) {
     return Promise.all(reportSentiments);
   }).then((sentiments) => {
     sentiments.forEach((sentiment, i) => {
-      reportAndSentiment.push({report: reports[i], sentiment: JSON.parse(sentiment)});
-      addReportToTable(reports[i], JSON.parse(sentiment));
+      let jsonSentiment = JSON.parse(sentiment);
+      reportAndSentiment.push({report: reports[i], sentiment: jsonSentiment});
+      placeReportOnMap(reports[i], jsonSentiment);
+      addReportToTable(reports[i], jsonSentiment);
     });
   }).catch((statusCode) => {
     console.error('error code: ' + statusCode);
@@ -124,9 +125,9 @@ function getReportsInArea(latitude, longitude) {
 function addReportToTable(report, sentiment) {
   let td = '';
   if (sentiment.score >= 0.2) {
-    td = '<td><img src="/public/images/caret-up.svg" class="sentimentArrow"></td>';
+    td = '<td><img src="/public/images/thumbsup.png" class="sentimentArrow"></td>';
   } else if (sentiment.score <= -0.2) {
-    td = '<td><img src="/public/images/caret-down.svg" class="sentimentArrow"></td>';
+    td = '<td><img src="/public/images/thumbsdown.png" class="sentimentArrow"></td>';
   } else {
     td = '<td><img src="public/images/horizontal-line.png" class="sentimentArrow"></td>'
   }
@@ -176,7 +177,7 @@ function panMapToMarker(reportID) {
  }
  */
 
-function placeReportOnMap(report) {
+function placeReportOnMap(report, sentiment) {
   let reportLocation = new google.maps.LatLng(
     report.location.coordinates[1], report.location.coordinates[0]);
 
@@ -194,8 +195,23 @@ function placeReportOnMap(report) {
     content: contentString
   });
 
+  let markerImage = {
+    size: new google.maps.Size(20, 32),
+    origin: new google.maps.Point(0, 0),
+    anchor: new google.maps.Point(10, 32)
+  };
+
+  if (sentiment.score >= 0.2) {
+    markerImage.url = '/public/images/markerBlue.png';
+  } else if (sentiment.score <= -0.2) {
+    markerImage.url = '/public/images/markerRed.png';
+  } else {
+    markerImage.url = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+  }
+
   let marker = new google.maps.Marker({
     position: reportLocation,
+    icon: markerImage,
     map: map,
     title: report.transcript,
     infoWindow: infowindow
