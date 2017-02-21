@@ -109,14 +109,17 @@ function getReportsInArea(latitude, longitude) {
  db.reports.insert({"location":{"coordinates":[37.382592,-122.067452],"type":"Point"},"transcript":"Offshore drilling rig explosion, plz send halp","timestamp":null}
  */
 
+// true for thumbs up, false for thumbs down
+function shouldBeThumbsUp(report) {
+  return report.sentiment.score >= 0.1
+}
+
 function addReportToTable(report) {
   let td = '';
-  if (report.sentiment.score >= 0.2) {
+  if (shouldBeThumbsUp(report)) {
     td = '<td id="sentimentIconData"><img src="/public/images/thumbup.svg" class="sentimentIcon"></td>';
-  } else if (report.sentiment.score <= -0.2) {
-    td = '<td id="sentimentIconData"><img src="/public/images/thumbdown.svg" class="sentimentIcon"></td>';
   } else {
-    // td = '<td id="sentimentIconData"><img src="/public/images/horizontal-line.png" class="sentimentIcon"></td>'
+    td = '<td id="sentimentIconData"><img src="/public/images/thumbdown.svg" class="sentimentIcon"></td>';
   }
   let id = 'report_' + report._id;
   let tr = '<tr id="' + id + '"><td class="transcriptText">' + report.transcript + '</td>' + td + '</tr>';
@@ -128,10 +131,6 @@ function addReportToTable(report) {
 
 function removeAllReportsFromTable() {
   $('#tableOfReports').find('tr').has('td').remove();
-}
-
-function sortTable() {
-
 }
 
 function closeMarkerInfoWindows() {
@@ -192,12 +191,10 @@ function placeReportOnMap(report) {
     anchor: new google.maps.Point(10, 32)
   };
 
-  if (report.sentiment.score >= 0.2) {
+  if (shouldBeThumbsUp(report)) {
     markerImage.url = '/public/images/markerGreen.svg';
-  } else if (report.sentiment.score <= -0.2) {
-    markerImage.url = '/public/images/markerRed.svg';
   } else {
-    markerImage.url = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+    markerImage.url = '/public/images/markerRed.svg';
   }
 
   let marker = new google.maps.Marker({
