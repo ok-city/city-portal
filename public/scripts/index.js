@@ -1,6 +1,7 @@
 let map;
-let reportAndSentiment = [];
-let totalMarkers = [];
+let totalReports = []; // contains reports
+let totalMarkers = []; // contains markers
+let reportsOnMap = []; // {report: report, sentiment: {score: score, magnitude: magnitude}}
 function initMap() { // Called by async request to Google
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: -34.397, lng: 150.644},
@@ -20,20 +21,18 @@ function initMap() { // Called by async request to Google
 }
 
 function filterMarkers(term) {
-  let idsOfMarkersThatShouldBeOnMap = reportAndSentiment
-    .filter(reportObj => reportObj.report.transcript.toLowerCase().includes(term.toLowerCase()))
-    .map(reportObj => reportObj.report._id);
+  let idsOfMarkersThatShouldBeOnMap = totalReports
+    .filter(report => report.transcript.toLowerCase().includes(term.toLowerCase()))
+    .map(report => report._id);
   removeAllReportsFromTable();
   idsOfMarkersThatShouldBeOnMap
-    .forEach(id => reportAndSentiment.filter(reportObj => reportObj.report._id === id)
-      .forEach(reportObj => addReportToTable(reportObj.report, reportObj.sentiment)));
+    .forEach(id => totalReports.filter(report => report._id === id)
+      .forEach(report => addReportToTable(report)));
   totalMarkers
-    .filter(markerObj => !idsOfMarkersThatShouldBeOnMap.includes(markerObj.id))
-    .map(markerObj => markerObj.marker)
+    .filter(marker => !idsOfMarkersThatShouldBeOnMap.includes(marker._id))
     .forEach(marker => marker.setMap(null));
   totalMarkers
-    .filter(markerObj => idsOfMarkersThatShouldBeOnMap.includes(markerObj.id))
-    .map(markerObj => markerObj.marker)
+    .filter(marker => idsOfMarkersThatShouldBeOnMap.includes(marker._id))
     .forEach(marker => marker.setMap(map));
   panMapToMarker(idsOfMarkersThatShouldBeOnMap[0]);
 }
@@ -72,26 +71,14 @@ function centerMap(latitude, longitude) {
 function getReportsInArea(latitude, longitude) {
   // Get all reports everywhere ¯\_(ツ)_/¯
 
-  let reports = [];
-
   let getReportsURL = '/getReports/?lat=' + latitude + '&lon=' + longitude + '&radius=' + 500000;
   httpGetAsync(getReportsURL).then((data) => {
-    let reportSentiments = [];
     console.log('report = ' + data);
     let jsonData = JSON.parse(data);
     jsonData.forEach((report) => {
-      reports.push(report);
-      let url = '/getSentiment/?text=' + report.transcript;
-      let sentimentHere = httpGetAsync(url);
-      reportSentiments.push(sentimentHere); // collect the promises
-    });
-    return Promise.all(reportSentiments);
-  }).then((sentiments) => {
-    sentiments.forEach((sentiment, i) => {
-      let jsonSentiment = JSON.parse(sentiment);
-      reportAndSentiment.push({report: reports[i], sentiment: jsonSentiment});
-      placeReportOnMap(reports[i], jsonSentiment);
-      addReportToTable(reports[i], jsonSentiment);
+      totalReports.push(report);
+      placeReportOnMap(report);
+      addReportToTable(report);
     });
   }).catch((statusCode) => {
     console.error('error code: ' + statusCode);
@@ -122,14 +109,14 @@ function getReportsInArea(latitude, longitude) {
  db.reports.insert({"location":{"coordinates":[37.382592,-122.067452],"type":"Point"},"transcript":"Offshore drilling rig explosion, plz send halp","timestamp":null}
  */
 
-function addReportToTable(report, sentiment) {
+function addReportToTable(report) {
   let td = '';
-  if (sentiment.score >= 0.2) {
+  if (report.sentiment.score >= 0.2) {
     td = '<td id="sentimentIconData"><img src="/public/images/thumbup.svg" class="sentimentIcon"></td>';
-  } else if (sentiment.score <= -0.2) {
+  } else if (report.sentiment.score <= -0.2) {
     td = '<td id="sentimentIconData"><img src="/public/images/thumbdown.svg" class="sentimentIcon"></td>';
   } else {
-    td = '<td id="sentimentIconData"><img src="/public/images/horizontal-line.png" class="sentimentIcon"></td>'
+    // td = '<td id="sentimentIconData"><img src="/public/images/horizontal-line.png" class="sentimentIcon"></td>'
   }
   let id = 'report_' + report._id;
   let tr = '<tr id="' + id + '"><td class="transcriptText">' + report.transcript + '</td>' + td + '</tr>';
@@ -143,11 +130,15 @@ function removeAllReportsFromTable() {
   $('#tableOfReports').find('tr').has('td').remove();
 }
 
+function sortTable() {
+
+}
+
 function closeMarkerInfoWindows() {
-  totalMarkers.forEach(marker => marker.marker.infoWindow.close());
+  totalMarkers.forEach(marker => marker.infoWindow.close());
 }
 function panMapToMarker(reportID) {
-  let markerToPanTo = totalMarkers.filter(marker => marker.id === reportID).map(marker => marker.marker)[0];
+  let markerToPanTo = totalMarkers.filter(marker => marker._id === reportID)[0];
   closeMarkerInfoWindows();
   map.panTo(markerToPanTo.position);
   markerToPanTo.infoWindow.open(map, markerToPanTo);
@@ -177,7 +168,7 @@ function panMapToMarker(reportID) {
  }
  */
 
-function placeReportOnMap(report, sentiment) {
+function placeReportOnMap(report) {
   let reportLocation = new google.maps.LatLng(
     report.location.coordinates[1], report.location.coordinates[0]);
 
@@ -201,10 +192,10 @@ function placeReportOnMap(report, sentiment) {
     anchor: new google.maps.Point(10, 32)
   };
 
-  if (sentiment.score >= 0.2) {
-    markerImage.url = '/public/images/markerBlue.png';
-  } else if (sentiment.score <= -0.2) {
-    markerImage.url = '/public/images/markerRed.png';
+  if (report.sentiment.score >= 0.2) {
+    markerImage.url = '/public/images/markerGreen.svg';
+  } else if (report.sentiment.score <= -0.2) {
+    markerImage.url = '/public/images/markerRed.svg';
   } else {
     markerImage.url = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
   }
@@ -214,10 +205,11 @@ function placeReportOnMap(report, sentiment) {
     icon: markerImage,
     map: map,
     title: report.transcript,
-    infoWindow: infowindow
+    infoWindow: infowindow,
+    _id: report._id
   });
 
-  totalMarkers.push({marker: marker, id: report._id});
+  totalMarkers.push(marker);
 
   marker.addListener('click', function () {
     infowindow.open(map, marker);
