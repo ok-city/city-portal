@@ -1,7 +1,6 @@
 let map;
 let totalReports = []; // contains reports
 let totalMarkers = []; // contains markers
-let reportsOnMap = []; // {report: report, sentiment: {score: score, magnitude: magnitude}}
 function initMap() { // Called by async request to Google
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: -34.397, lng: 150.644},
@@ -12,29 +11,70 @@ function initMap() { // Called by async request to Google
     if (e.keyCode === 13) {
       let query = $('#searchInput').val();
       console.log('searching for ' + query);
-      filterMarkers(query);
+      applyFilterToMarkers(query);
       $('#queryText').text('Query: ' + query);
     }
   });
 
+  $('#resolveButton').click(() => {
+    let idsToResolve = totalReports.filter(report => $('#checkbox_report_' + report._id).is(':checked'))
+      .map(report => report._id);
+    resolveReports(idsToResolve).then(() => {
+      console.log('resolved!');
+    }).catch((err) => {
+      console.error('error: ' + err);
+    });
+  });
+
+  $('#resolvedFilter').click(() => {
+    $('#resolvedFilter').toggleClass('enabledFilter');
+    if ($('#resolvedFilter').hasClass('enabledFilter')) {
+      putResolvedReportsOnTable();
+    } else {
+      putUnresolvedReportsOnTable();
+    }
+  });
   getUserLocation();
 }
 
-function filterMarkers(term) {
+function displayCertainReports(filter) {
   let idsOfMarkersThatShouldBeOnMap = totalReports
-    .filter(report => report.transcript.toLowerCase().includes(term.toLowerCase()))
+    .filter(report => filter(report))
     .map(report => report._id);
   removeAllReportsFromTable();
-  idsOfMarkersThatShouldBeOnMap
+  idsOfMarkersThatShouldBeOnMap // Add the reports to the table
     .forEach(id => totalReports.filter(report => report._id === id)
       .forEach(report => addReportToTable(report)));
-  totalMarkers
+  totalMarkers // Remove nonmatching markers from the map
     .filter(marker => !idsOfMarkersThatShouldBeOnMap.includes(marker._id))
     .forEach(marker => marker.setMap(null));
-  totalMarkers
+  totalMarkers // Add matching markers to the map
     .filter(marker => idsOfMarkersThatShouldBeOnMap.includes(marker._id))
     .forEach(marker => marker.setMap(map));
   panMapToMarker(idsOfMarkersThatShouldBeOnMap[0]);
+}
+
+function putResolvedReportsOnTable() {
+  displayCertainReports(report => report.resolved);
+}
+
+function putUnresolvedReportsOnTable() {
+  displayCertainReports(report => !report.resolved);
+}
+
+function resolveReports(ids) {
+  return new Promise(() => {
+    const resolveUrl = '/resolve/';
+    let resolves = [];
+    ids.forEach((id) => {
+      resolves.push(httpPostAsync(resolveUrl, '_id=' + id));
+    });
+    return Promise.all(resolves);
+  });
+}
+
+function applyFilterToMarkers(term) {
+  displayCertainReports(report => report.transcript.toLowerCase().includes(term.toLowerCase()));
 }
 
 function getUserLocation() {
@@ -71,7 +111,7 @@ function centerMap(latitude, longitude) {
 function getReportsInArea(latitude, longitude) {
   // Get all reports everywhere ¯\_(ツ)_/¯
 
-  let getReportsURL = '/getReports/?lat=' + latitude + '&lon=' + longitude + '&radius=' + 500000;
+  const getReportsURL = '/getReports/?lat=' + latitude + '&lon=' + longitude + '&radius=' + 500000;
   httpGetAsync(getReportsURL).then((data) => {
     console.log('report = ' + data);
     let jsonData = JSON.parse(data);
@@ -122,11 +162,33 @@ function addReportToTable(report) {
     td = '<td id="sentimentIconData"><img src="/public/images/thumbdown.svg" class="sentimentIcon"></td>';
   }
   let id = 'report_' + report._id;
-  let tr = '<tr id="' + id + '"><td class="transcriptText">' + report.transcript + '</td>' + td + '</tr>';
+  let tr = '<tr id="' + id + '">' +
+    '<td>' +
+    '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="checkbox_' + id + '">' +
+    '<input type="checkbox" id="checkbox_' + id + '" class="mdl-checkbox__input"/>' +
+    '</label>' +
+    '</td>' +
+    '<td class="transcriptText">' +
+    report.transcript +
+    '</td>'
+    + td +
+    '</tr>';
   $('#tableOfReports').append(tr);
   $('#' + id).click(() => {
     panMapToMarker(report._id);
   });
+  $('#checkbox_' + id).click(() => {
+    if ($('#checkbox_' + id).is(':checked')) {
+      // enable the resolve buttons
+      $('.selectedReportButton').prop('disabled', false);
+    } else {
+      // check if any other checkboxes are checked
+      if (totalReports.every(report => !$('#checkbox_report_' + report._id).is(':checked'))) {
+        $('.selectedReportButton').prop('disabled', true);
+      }
+    }
+  });
+  componentHandler.upgradeDom('MaterialCheckbox');
 }
 
 function removeAllReportsFromTable() {
@@ -136,6 +198,7 @@ function removeAllReportsFromTable() {
 function closeMarkerInfoWindows() {
   totalMarkers.forEach(marker => marker.infoWindow.close());
 }
+
 function panMapToMarker(reportID) {
   let markerToPanTo = totalMarkers.filter(marker => marker._id === reportID)[0];
   closeMarkerInfoWindows();
@@ -213,21 +276,38 @@ function placeReportOnMap(report) {
   });
 }
 
-function httpGetAsync(theUrl) {
+function httpGetAsync(url) {
   return new Promise((resolve, reject) => {
     let request = new XMLHttpRequest();
-    request.open("GET", theUrl, true); // true for asynchronous
-    request.send(null);
+    request.open("GET", url, true); // true for asynchronous
     request.onreadystatechange = function () {
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200 || request.status === 304) {
-          // console.log('resolving with data: ' + request.responseText);
           resolve(request.responseText);
         } else {
-          console.log('rejecting!');
           reject(request.status);
         }
       }
     };
+    request.send(null);
+  });
+}
+
+function httpPostAsync(url, params) {
+  return new Promise((resolve, reject) => {
+    let request = new XMLHttpRequest();
+    request.open("POST", url, true); // true for asynchronous
+    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    request.onreadystatechange = function () {
+      if (request.readyState === XMLHttpRequest.DONE) {
+        if (request.status === 200 || request.status === 304) {
+          resolve(request.responseText);
+        } else {
+          reject(request.status);
+        }
+      }
+    };
+    console.log('params = ' + params);
+    request.send(params);
   });
 }

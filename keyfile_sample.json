@@ -2,11 +2,11 @@
   "type": "service_account",
   "project_id": "your_project",
   "private_key_id": "your_id",
-  "private_key": "-----BEGIN PRIVATE KEY-----\n fooooo bar plaz \n-----END PRIVATE KEY-----\n",
+  "private_key": "-----BEGIN PRIVATE KEY-----\n fooooo bar pl0x \n-----END PRIVATE KEY-----\n",
   "client_email": "the_email",
   "client_id": "the_id",
   "auth_uri": "epic_url",
   "token_uri": "tokedytoken",
-  "auth_provider_x509_cert_url": "certs_my_boi",
+  "auth_provider_x509_cert_url": "certs_my_bois",
   "client_x509_cert_url": "moar_certs_urlz"
 }
