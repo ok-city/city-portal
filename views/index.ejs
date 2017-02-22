@@ -29,17 +29,17 @@
         </div>
         <hr>
         <div class="sidepanel-body">
-
             <button class="mdl-button mdl-js-button mdl-button--raised selectedReportButton" id="resolveButton"
                     disabled>
                 Resolve
             </button>
+            <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active" id="loadingSpinner"></div>
             <table class="mdl-data-table mdl-shadow--2dp" id="tableOfReports">
                 <thead>
                 <tr>
-                    <th style="width: 10%; margin-left: -10; align-content: center"></th>
-                    <th style="width: 60%; text-align: left; overflow-x: hidden">Report</th>
-                    <th style="width:30%; text-align: center;">Sentiment</th>
+                    <th style="width: 10%; align-content: center"></th>
+                    <th style="width: 60%; align-content: left; overflow-x: hidden">Report</th>
+                    <th style="width: 30%; text-align: center;">Sentiment</th>
                 </tr>
                 </thead>
                 <tbody>

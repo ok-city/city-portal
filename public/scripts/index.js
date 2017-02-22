@@ -20,7 +20,7 @@ function initMap() { // Called by async request to Google
     let idsToResolve = totalReports.filter(report => $('#checkbox_report_' + report._id).is(':checked'))
       .map(report => report._id);
     resolveReports(idsToResolve).then(() => {
-      console.log('resolved!');
+      getUserLocation();
     }).catch((err) => {
       console.error('error: ' + err);
     });
@@ -29,55 +29,82 @@ function initMap() { // Called by async request to Google
   $('#resolvedFilter').click(() => {
     $('#resolvedFilter').toggleClass('enabledFilter');
     if ($('#resolvedFilter').hasClass('enabledFilter')) {
-      putResolvedReportsOnTable();
+      displayResolvedReports();
     } else {
-      putUnresolvedReportsOnTable();
+      displayUnresolvedReports();
     }
   });
+
+  startSpinningSpinner();
   getUserLocation();
 }
 
+function startSpinningSpinner() {
+  $('#loadingSpinner').addClass('is-active');
+}
+
+function stopSpinningSpinner() {
+  $('#loadingSpinner').removeClass('is-active');
+}
+
 function displayCertainReports(filter) {
-  let idsOfMarkersThatShouldBeOnMap = totalReports
-    .filter(report => filter(report))
-    .map(report => report._id);
-  removeAllReportsFromTable();
-  idsOfMarkersThatShouldBeOnMap // Add the reports to the table
-    .forEach(id => totalReports.filter(report => report._id === id)
-      .forEach(report => addReportToTable(report)));
-  totalMarkers // Remove nonmatching markers from the map
-    .filter(marker => !idsOfMarkersThatShouldBeOnMap.includes(marker._id))
-    .forEach(marker => marker.setMap(null));
-  totalMarkers // Add matching markers to the map
-    .filter(marker => idsOfMarkersThatShouldBeOnMap.includes(marker._id))
-    .forEach(marker => marker.setMap(map));
-  panMapToMarker(idsOfMarkersThatShouldBeOnMap[0]);
+  return new Promise((resolve, reject) => {
+    let idsOfMarkersThatShouldBeOnMap = totalReports
+      .filter(report => filter(report))
+      .map(report => report._id);
+    removeAllReportsFromTable();
+    idsOfMarkersThatShouldBeOnMap // Add the reports to the table
+      .forEach(id => totalReports.filter(report => report._id === id)
+        .forEach(report => addReportToTable(report)));
+    totalMarkers // Remove nonmatching markers from the map
+      .filter(marker => !idsOfMarkersThatShouldBeOnMap.includes(marker._id))
+      .forEach(marker => marker.setMap(null));
+    totalMarkers // Add matching markers to the map
+      .filter(marker => idsOfMarkersThatShouldBeOnMap.includes(marker._id))
+      .forEach(marker => marker.setMap(map));
+    panMapToMarker(idsOfMarkersThatShouldBeOnMap[0]).then(() => {
+      resolve();
+    }).catch(() => {
+      reject();
+    });
+  });
 }
 
-function putResolvedReportsOnTable() {
-  displayCertainReports(report => report.resolved);
+function displayResolvedReports() {
+  startSpinningSpinner();
+  displayCertainReports(report => report.resolved).then(() => {
+    stopSpinningSpinner();
+  });
 }
 
-function putUnresolvedReportsOnTable() {
-  displayCertainReports(report => !report.resolved);
+function displayUnresolvedReports() {
+  startSpinningSpinner();
+  displayCertainReports(report => !report.resolved).then(() => {
+    stopSpinningSpinner();
+  });
+}
+
+function applyFilterToMarkers(term) {
+  return displayCertainReports(report => report.transcript.toLowerCase().includes(term.toLowerCase()));
 }
 
 function resolveReports(ids) {
-  return new Promise(() => {
+  return new Promise((resolve, reject) => {
     const resolveUrl = '/resolve/';
     let resolves = [];
     ids.forEach((id) => {
       resolves.push(httpPostAsync(resolveUrl, '_id=' + id));
     });
-    return Promise.all(resolves);
+    Promise.all(resolves).then(() => {
+      resolve();
+    }).catch((err) => {
+      reject(err);
+    });
   });
 }
 
-function applyFilterToMarkers(term) {
-  displayCertainReports(report => report.transcript.toLowerCase().includes(term.toLowerCase()));
-}
-
 function getUserLocation() {
+  startSpinningSpinner();
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function (position) {
       centerMap(position.coords.latitude, position.coords.longitude);
@@ -110,16 +137,19 @@ function centerMap(latitude, longitude) {
 
 function getReportsInArea(latitude, longitude) {
   // Get all reports everywhere ¯\_(ツ)_/¯
-
+  totalReports = [];
+  totalMarkers = [];
   const getReportsURL = '/getReports/?lat=' + latitude + '&lon=' + longitude + '&radius=' + 500000;
   httpGetAsync(getReportsURL).then((data) => {
     console.log('report = ' + data);
     let jsonData = JSON.parse(data);
     jsonData.forEach((report) => {
       totalReports.push(report);
+      // These must be called to create all the markers on the map, or else displayUnresolvedReports and such do not work.
       placeReportOnMap(report);
       addReportToTable(report);
     });
+    displayUnresolvedReports();
   }).catch((statusCode) => {
     console.error('error code: ' + statusCode);
   });
@@ -162,7 +192,13 @@ function addReportToTable(report) {
     td = '<td id="sentimentIconData"><img src="/public/images/thumbdown.svg" class="sentimentIcon"></td>';
   }
   let id = 'report_' + report._id;
-  let tr = '<tr id="' + id + '">' +
+  let tr = "";
+  if (report.resolved) {
+    tr += '<tr class="resolvedReportRow" id="' + id + '">';
+  } else {
+    tr += '<tr id="' + id + '">';
+  }
+  tr = tr +
     '<td>' +
     '<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="checkbox_' + id + '">' +
     '<input type="checkbox" id="checkbox_' + id + '" class="mdl-checkbox__input"/>' +
@@ -200,10 +236,13 @@ function closeMarkerInfoWindows() {
 }
 
 function panMapToMarker(reportID) {
-  let markerToPanTo = totalMarkers.filter(marker => marker._id === reportID)[0];
-  closeMarkerInfoWindows();
-  map.panTo(markerToPanTo.position);
-  markerToPanTo.infoWindow.open(map, markerToPanTo);
+  return new Promise((resolve, reject) => {
+    let markerToPanTo = totalMarkers.filter(marker => marker._id === reportID)[0];
+    closeMarkerInfoWindows();
+    map.panTo(markerToPanTo.position);
+    markerToPanTo.infoWindow.open(map, markerToPanTo);
+    resolve();
+  });
 }
 
 /*

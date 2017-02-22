@@ -96,3 +96,11 @@ html, body, #map-canvas {
     background: #35529A;
     color: #FFFFFF;
 }
+
+#loadingSpinner {
+    margin-left: 20px;
+}
+
+.resolvedReportRow {
+    background-color: #dddddd;
+}
