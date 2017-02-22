@@ -6,10 +6,11 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-    <script src="/public/scripts/index.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/public/styles/index.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="/public/scripts/index.js"></script>
 </head>
 <body>
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
@@ -20,13 +21,24 @@
                 <input type="text" id="searchInput" placeholder="Filter Reports" size="1">
             </form>
         </div>
+
+        <div style="margin-left: 20px; margin-top: 20px">
+            <button type="button" class="mdl-chip" id="resolvedFilter">
+                <span class="mdl-chip__text">Resolved</span>
+            </button>
+        </div>
         <hr>
         <div class="sidepanel-body">
-            <p id="queryText">Query: All</p>
-            <table class="mdl-data-table mdl-shadow--2dp sortable" id="tableOfReports">
+
+            <button class="mdl-button mdl-js-button mdl-button--raised selectedReportButton" id="resolveButton"
+                    disabled>
+                Resolve
+            </button>
+            <table class="mdl-data-table mdl-shadow--2dp" id="tableOfReports">
                 <thead>
                 <tr>
-                    <th style="widows: 70%; text-align: left;">Report</th>
+                    <th style="width: 10%; margin-left: -10; align-content: center"></th>
+                    <th style="width: 60%; text-align: left; overflow-x: hidden">Report</th>
                     <th style="width:30%; text-align: center;">Sentiment</th>
                 </tr>
                 </thead>

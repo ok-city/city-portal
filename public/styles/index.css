@@ -75,9 +75,8 @@ html, body, #map-canvas {
     table-layout: fixed;
 }
 
-.sidepanel-body td {
+.transcriptText {
     overflow-x: hidden;
-    text-align: left;
 }
 
 #sentimentIconData {
@@ -87,4 +86,13 @@ html, body, #map-canvas {
 .sentimentArrow {
     width: 25px;
     height: 25px;
+}
+
+.selectedReportButton {
+    margin-bottom: 20px;
+}
+
+.enabledFilter {
+    background: #35529A;
+    color: #FFFFFF;
 }

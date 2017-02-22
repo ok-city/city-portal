@@ -1,10 +1,4 @@
-const gcloud = require('google-cloud');
-const language = gcloud.language;
-
-const languageClient = language({
-  projectId: 'naturallanguage-157004',
-  keyFilename: './keyfile.json'
-});
+let request = require('./requester');
 
 module.exports = (app, db) => {
   app.get('/', (req, res) => {
@@ -39,25 +33,17 @@ module.exports = (app, db) => {
       });
   });
 
-  app.get('/getSentiment/*', (req, res) => {
-    let text = req.query.text;
-    getSentiment(text).then((sentiment) => {
-      res.status(200).send(sentiment);
+  app.post('/resolve/', (req, res) => {
+    const url = '/resolve/';
+    request.post(url, {form: {_id: req.body._id}}).then(() => {
+      res.status(200).send();
+    }).catch((err) => {
+      if (err) {
+        console.log('errored with ' + err);
+        res.status(500).send(err);
+      } else {
+        res.status(400).send();
+      }
     });
   });
-
-  function getSentiment(text) {
-    return new Promise((resolve, reject) => {
-      languageClient.detectSentiment(text, (err, nuthin, dataz) => {
-        if (!err) {
-          resolve({
-            score: dataz.documentSentiment.score,
-            magnitude: dataz.documentSentiment.magnitude
-          });
-        } else {
-          reject(undefined);
-        }
-      });
-    });
-  }
 };

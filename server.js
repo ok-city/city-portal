@@ -13,7 +13,7 @@ app.use(session({
   saveUninitialized: true
 }));
 app.use(lusca({
-  csrf: true,
+  // csrf: true,
   // csp: {policy: {
   //   'default-src': '\'self\''
   // }},
