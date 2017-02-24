@@ -35,7 +35,7 @@ app.use('/public', express.static('public'));
 let morgan = require('morgan');
 app.use(morgan('dev'));
 
-let router = require('./router.js');
+let router = require('./modules/router.js');
 let mongodbClient = require('mongodb').MongoClient;
 mongodbClient.connect(mongoURL).then((db) => {
   router(app, db);
