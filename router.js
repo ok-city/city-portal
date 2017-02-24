@@ -5,6 +5,10 @@ module.exports = (app, db) => {
     res.status(200).render('index');
   });
 
+  app.get('/statistics/', (req, res) => {
+    res.status(200).render('statistics');
+  });
+
   app.get('/getReports/*', (req, res) => {
     const latCenter = parseFloat(req.query.lat);
     const lonCenter = parseFloat(req.query.lon);
