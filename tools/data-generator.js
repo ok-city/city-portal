@@ -7,14 +7,16 @@ let numberOfReports = 730;
 let latCenter = 38.539974;
 let lonCenter = -121.494033;
 let possibleReportBase = [
-  'Gutter clogged by leaves, water flooding side of road',
-  'Awesome food truck at this corner!',
-  'Garbage littering Bernardo avenue after garbage truck spill!',
-  'Drinking fountain is leaking water near the tennis courts',
-  'Dude giving out free pizzas at corner',
-  'Spicy meem maker sitting on sidewalk',
-  'Traffic light broken from fallen tree',
-  'Traffic light finally fixed'
+  'Gutter clogged by leaves, water flooding side of road',        // negative
+  'Awesome food truck at this corner!',                           // positive
+  'Garbage littering Bernardo avenue after garbage truck spill!', // negative
+  'Drinking fountain is leaking water near the tennis courts',    // negative
+  'Dude giving out free pizzas at corner',                        // positive
+  'Spicy meem maker sitting on sidewalk',                         // positive
+  'Traffic light broken from fallen tree',                        // negative
+  'Traffic light finally fixed',                                  // positive
+  'Congestion on onramp slowly clearing up',                      // positive
+  'Highway expanded to six lanes now!',                           // positive
 ];
 
 // radius for latitude and longitude

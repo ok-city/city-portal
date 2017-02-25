@@ -25,10 +25,10 @@ module.exports.post = function (path, data) {
     console.log('posting to ' + url);
     request.post(url, data, function (error, response, body) {
       if (!error && response.statusCode === 200) {
-        console.log('resolving');
+        console.log('resolving data ' + JSON.stringify(data));
         resolve();
       } else {
-        console.log('rejecting');
+        console.log(error + ' rejecting data ' + JSON.stringify(data));
         reject(error);
       }
     });
