@@ -204,7 +204,7 @@ function addReportToTable(report) {
     '<input type="checkbox" id="checkbox_' + id + '" class="mdl-checkbox__input"/>' +
     '</label>' +
     '</td>' +
-    '<td class="transcriptText">' +
+    '<td class="transcriptText" style="text-align: left;">' +
     report.transcript +
     '</td>'
     + td +
