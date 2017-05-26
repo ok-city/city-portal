@@ -38,7 +38,7 @@ module.exports = (app, db) => {
   });
 
   app.post('/resolve/', (req, res) => {
-    const url = '/resolve/';
+    const url = 'resolve/';
     request.post(url, {form: {_id: req.body._id}}).then(() => {
       res.status(200).send();
     }).catch((err) => {
