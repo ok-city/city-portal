@@ -3,7 +3,7 @@ require('dotenv').config();
 let requester = require('../modules/requester');
 
 let timeRange = [1451620898, 1483243298]; // Jan 1 2016 to Jan 1 2017
-let numberOfReports = 730;
+let numberOfReports = 50;
 let latCenter = 38.539974;
 let lonCenter = -121.494033;
 let possibleReportBase = [
@@ -11,8 +11,7 @@ let possibleReportBase = [
   'Awesome food truck at this corner!',                           // positive
   'Garbage littering Bernardo avenue after garbage truck spill!', // negative
   'Drinking fountain is leaking water near the tennis courts',    // negative
-  'Dude giving out free pizzas at corner',                        // positive
-  'Spicy meem maker sitting on sidewalk',                         // positive
+  'Salesperson giving out free pizzas at corner',                 // positive
   'Traffic light broken from fallen tree',                        // negative
   'Traffic light finally fixed',                                  // positive
   'Congestion on onramp slowly clearing up',                      // positive

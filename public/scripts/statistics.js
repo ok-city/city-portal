@@ -74,25 +74,25 @@ function drawSentimentLineChart() {
   return new Promise((resolve, reject) => {
     console.log('drawing sentiment line chart');
     getReports().then((results) => {
-      let jsonReports = JSON.parse(results);
+      const jsonReports = JSON.parse(results);
       jsonReports.sort((a, b) => { // sort by timestamp, hopefully ascending
         return a.timestamp - b.timestamp;
       });
 
-      let data = new google.visualization.DataTable();
+      const data = new google.visualization.DataTable();
       data.addColumn('date', 'Date');
       data.addColumn('number', 'Positive');
       data.addColumn('number', 'Negative');
       jsonReports.forEach((report, i, reports) => {
         // let date = new Date(report.timestamp / 1000).toUTCString();
-        let date = new Date(report.timestamp * 1000);
-        let positiveSentiments = reports.slice(0, i).reduce((acc, report) => acc + ((report.sentiment.score >= 0) ? 1 : 0), 0);
-        let negativeSentiments = reports.slice(0, i).reduce((acc, report) => acc + ((report.sentiment.score < 0) ? 1 : 0), 0);
-        let percentPositive = positiveSentiments / (jsonReports.length) * 100;
-        let percentNegative = negativeSentiments / (jsonReports.length) * 100;
+        const date = new Date(report.timestamp * 1000);
+        const positiveSentiments = reports.slice(0, i).reduce((acc, report) => acc + ((report.sentiment.score >= 0) ? 1 : 0), 0);
+        const negativeSentiments = reports.slice(0, i).reduce((acc, report) => acc + ((report.sentiment.score < 0) ? 1 : 0), 0);
+        const percentPositive = positiveSentiments / (jsonReports.length) * 100;
+        const percentNegative = negativeSentiments / (jsonReports.length) * 100;
         data.addRow([date, percentPositive, percentNegative]);
       });
-      let materialChart = new google.visualization.AnnotatedTimeLine($('#sentiment-timeline')[0]);
+      const materialChart = new google.visualization.AnnotatedTimeLine($('#sentiment-timeline')[0]);
       materialChart.draw(data, {displayAnnoations: true});
       resolve();
     });

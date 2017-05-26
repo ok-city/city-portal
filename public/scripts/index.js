@@ -155,30 +155,6 @@ function getReportsInArea(latitude, longitude) {
   });
 }
 
-/*
- {
- "_id":"588cf31775ed5d680745be4c",
- "location":{
- "coordinates":[0,0],
- "type":"Point"
- },
- "transcript":"Offshore drilling rig explosion, plz send halp",
- "timestamp":null
- },
- {
- "_id":"588ec1b44bbd3968a3b8cd69",
- "location":{
- "coordinates":[-122.06494,37.377958],
- "type":"Point"
- },
- "transcript":"\"Pool filter is clogged.\"",
- "timestamp":1485750687218000
- }
-
-
- db.reports.insert({"location":{"coordinates":[37.382592,-122.067452],"type":"Point"},"transcript":"Offshore drilling rig explosion, plz send halp","timestamp":null}
- */
-
 // true for thumbs up, false for thumbs down
 function shouldBeThumbsUp(report) {
   return report.sentiment.score >= 0.1
@@ -244,30 +220,6 @@ function panMapToMarker(reportID) {
     resolve();
   });
 }
-
-/*
- function placeSentimentOnMap(sentiment, report) {
-
- let theActualReport = JSON.parse(report)[0];
- let opacity = Math.min(Math.min(sentiment.magnitude, 0), 1);
- // let redComponent =
-
- console.log('theActualReport = ' + theActualReport);
- console.log('coordinates = ' + theActualReport.location.coordinates);
-
- let sentimentCircle = new google.maps.Circle({
- strokeColor: '#FF0000',
- strokeOpacity: 0.8,
- strokeWeight: 2,
- fillColor: '#ff7663',
- fillOpacity: 0.35,
- map: map,
- center: {lat: theActualReport.location.coordinates[1],
- lng: theActualReport.location.coordinates[0]},
- radius: 10
- });
- }
- */
 
 function placeReportOnMap(report) {
   let reportLocation = new google.maps.LatLng(
