@@ -90,7 +90,7 @@ function applyFilterToMarkers(term) {
 
 function resolveReports(ids) {
   return new Promise((resolve, reject) => {
-    const resolveUrl = '/resolve/';
+    const resolveUrl = 'resolve/';
     let resolves = [];
     ids.forEach((id) => {
       resolves.push(httpPostAsync(resolveUrl, '_id=' + id));
